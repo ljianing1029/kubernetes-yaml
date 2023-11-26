@@ -34,8 +34,9 @@ spec:
       labels:
         app: nfs-server
     spec:
-      nodeSelector:
-        "kubernetes.io/os": linux
+      nodeName: 10.0.0.10
+      #nodeSelector:
+      #  "kubernetes.io/os": linux
       containers:
         - name: nfs-server
           image: itsthenetwork/nfs-server-alpine:12 #修改镜像
