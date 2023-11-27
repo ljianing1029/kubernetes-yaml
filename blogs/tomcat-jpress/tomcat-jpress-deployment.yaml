@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat
+  namespace: blogs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tomcat
+  template:
+    metadata:
+      labels:
+        app: tomcat
+    spec:
+      nodeName: 10.0.0.11
+      containers:
+      - name: tomcat
+        #image: tomcat:9.0.73-jdk8
+        image: ljn1029/hw:tomcat9-jdk8-official
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: metrics
+          containerPort: 8081
+          protocol: TCP
+        volumeMounts:
+        - name: webapps
+          mountPath: /usr/local/tomcat/webapps
+      volumes:
+      - name: webapps
+        persistentVolumeClaim:
+          claimName: tomcat-jpress-pvc-nfs
