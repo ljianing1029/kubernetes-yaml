@@ -1,0 +1,74 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      component: server
+    #matchExpressions:
+    #- {key: app, operator: In, values: [prometheus]}
+    #- {key: component, operator: In, values: [server]}
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: server
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+    spec:
+      #nodeName: 10.0.0.10
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: prom/prometheus:v2.37.1
+        imagePullPolicy: IfNotPresent
+        args:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus'
+        - '--storage.tsdb.retention.time=720h'
+        - '--web.enable-lifecycle'
+        - '--web.external-url=/hw_prometheus'
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /etc/prometheus/prometheus.yml
+          name: prometheus-config
+          subPath: prometheus.yml
+        - mountPath: /prometheus/
+          name: prometheus-storage-volume
+        - mountPath: /etc/prometheus/tls/etcd
+          name: prometheus-etcd-certs
+        - mountPath: /etc/prometheus/rules/rule1.yaml
+          name: prometheus-rules
+          subPath: rule1.yaml
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: prometheus-config
+          items:
+          - key: prometheus.yml
+            path: prometheus.yml
+            mode: 0644
+      - name: prometheus-storage-volume
+        nfs:
+          server: 10.0.0.10
+          path: /data/nfs/prometheus-server
+      - name: prometheus-etcd-certs
+        configMap:
+          name: prometheus-etcd-certs
+      - name: prometheus-rules
+        configMap:
+          name: prometheus-rules
+          items:
+          - key: prometheus.rules
+            path: prometheus.rules
+            mode: 0644
