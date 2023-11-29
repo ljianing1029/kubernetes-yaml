@@ -24,7 +24,7 @@ spec:
         prometheus.io/scrape: 'true'
         prometheus.io/port: '9090'
     spec:
-      #nodeName: 10.0.0.10
+      nodeName: 10.0.0.10
       serviceAccountName: prometheus
       containers:
       - name: prometheus
@@ -45,11 +45,11 @@ spec:
           subPath: prometheus.yml
         - mountPath: /prometheus/
           name: prometheus-storage-volume
-        - mountPath: /etc/prometheus/tls/etcd
-          name: prometheus-etcd-certs
-        - mountPath: /etc/prometheus/rules/rule1.yaml
-          name: prometheus-rules
-          subPath: rule1.yaml
+        #- mountPath: /etc/prometheus/tls/etcd
+        #  name: prometheus-etcd-certs
+        #- mountPath: /etc/prometheus/rules/rule1.yaml
+        #  name: prometheus-rules
+        #  subPath: rule1.yaml
       volumes:
       - name: prometheus-config
         configMap:
@@ -59,16 +59,15 @@ spec:
             path: prometheus.yml
             mode: 0644
       - name: prometheus-storage-volume
-        nfs:
-          server: 10.0.0.10
-          path: /data/nfs/prometheus-server
-      - name: prometheus-etcd-certs
-        configMap:
-          name: prometheus-etcd-certs
-      - name: prometheus-rules
-        configMap:
-          name: prometheus-rules
-          items:
-          - key: prometheus.rules
-            path: prometheus.rules
-            mode: 0644
+        persistentVolumeClaim:
+          claimName: prometheus-pvc-nfs
+      #- name: prometheus-etcd-certs
+      #  configMap:
+      #    name: prometheus-etcd-certs
+      #- name: prometheus-rules
+      #  configMap:
+      #    name: prometheus-rules
+      #    items:
+      #    - key: prometheus.rules
+      #      path: prometheus.rules
+      #      mode: 0644
