@@ -23,9 +23,23 @@ data:
       static_configs:
       - targets: ['localhost:9090']
       metrics_path: '/hw_prometheus/metrics'
-    #- job_name: 'node-exporter'
+
+    # Scape config for prometheus node exporters.
+    #
+    - job_name: 'node-exporter'
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.*):10250'
+        replacement: '${1}:9100'
+        target_label: __address__
+        action: replace
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
     #  static_configs:
     #  - targets: ['10.0.0.10:9100','10.0.0.11:9100']
+
     #- job_name: 'cadvisor'
     #  static_configs:
     #  - targets: ['10.0.0.10:8080','10.0.0.11:8080']
