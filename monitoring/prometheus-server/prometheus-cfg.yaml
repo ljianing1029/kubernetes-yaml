@@ -40,9 +40,28 @@ data:
     #  static_configs:
     #  - targets: ['10.0.0.10:9100','10.0.0.11:9100']
 
+    # Scape config for prometheus node exporters.
+    #
+    - job_name: 'cadvisor'
+      kubernetes_sd_configs:
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
     #- job_name: 'cadvisor'
     #  static_configs:
     #  - targets: ['10.0.0.10:8080','10.0.0.11:8080']
+
     #- job_name: 'kube-state-metrics'
     #  static_configs:
     #  - targets: ['kube-state-system.kube-system.svc.cluster.local:8080']
