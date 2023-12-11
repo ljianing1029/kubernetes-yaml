@@ -65,9 +65,13 @@ data:
     #- job_name: 'kube-state-metrics'
     #  static_configs:
     #  - targets: ['kube-state-system.kube-system.svc.cluster.local:8080']
-    #- job_name: 'mysqld-exporter'
-    #  static_configs: 
-    #  - targets: ['mysql.mysql.svc.cluster.local:9104']
+
+    # Scape config for prometheus mysqld exporters.
+    # 
+    - job_name: 'mysqld-exporter'
+      static_configs: 
+      - targets: ['mysql.mysql.svc.cluster.local:9104']
+
     #- job_name: 'kube-dns'
     #  static_configs:
     #  - targets: ['kube-dns.kube-system.svc.cluster.local:9153']
